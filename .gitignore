@@ -1,3 +1,25 @@
+# Python virtual environments
+.venv/
+venv/
+
+# Build folders
+build/
+bin/
+
+# Large archives
+*.tar.gz
+*.zip
+
+# Compiled objects
+*.o
+*.so
+*.a
+
+# CMake cache
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
 
 /bin
 /build
