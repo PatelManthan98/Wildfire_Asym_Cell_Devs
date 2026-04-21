@@ -7,6 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories(
     ${PROJECT_SOURCE_DIR}/include
     ${PROJECT_SOURCE_DIR}/cadmium_v2/include
+    ${PROJECT_SOURCE_DIR}/libraries
 )
 
 add_executable(wildfire_sim

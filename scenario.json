@@ -10,19 +10,21 @@
 
       "state": {
         "state": 1,
+        "fuel_type": 3,
+        "elevation": 400.0,
+        "moisture": 0.30,
+        "intensity": 0.0,
         "burn_steps_remaining": 0
       },
 
       "config": {
         "ignition_prob": 0.10,
-        "burn_duration": 8,
-
         "wind_speed": 0.0,
         "wind_dir": 0.0,
-
-        "temperature": 20.0,
+        "temperature": 22.0,
         "humidity": 40.0,
-        "ffmc": 85.0
+        "ffmc": 85.0,
+        "cell_size_m": 100.0
       },
 
       "neighborhood": [
@@ -37,7 +39,11 @@
     "ignition": {
       "state": {
         "state": 2,
-        "burn_steps_remaining": 8
+        "fuel_type": 3,
+        "elevation": 400.0,
+        "moisture": 0.30,
+        "intensity": 0.9,
+        "burn_steps_remaining": 10
       },
       "cell_map": [
         [25, 25]

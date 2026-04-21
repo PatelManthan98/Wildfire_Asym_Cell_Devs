@@ -1,105 +1,109 @@
 #pragma once
 #include "wildfire_state.hpp"
-#include <cadmium/celldevs/grid/cell.hpp>
+#include <cadmium/celldevs/asymm/cell.hpp>
+#include <cadmium/celldevs/asymm/config.hpp>
+#include <array>
 #include <cmath>
 #include <cstdlib>
 
-struct WildfireCell : public cadmium::celldevs::GridCell<WildfireCellState, double> {
+/**
+ * WildfireAsymmCell  —  Asymmetric Cell-DEVS wildfire model
+ *
+ * In the symmetric grid version every cell shares the same Moore neighbourhood.
+ * Here each cell has its OWN neighbourhood, and the VICINITY value (double)
+ * is a PRE-COMPUTED directional weight encoding wind, slope, and fuel
+ * adjacency for each specific source→target cell pair.
+ *
+ *   vicinity = wind_factor × slope_factor × fuel_adjacency
+ *            = 0    if a firebreak (river/road) blocks the path
+ *            > 1    if strongly downwind and uphill
+ *
+ * The vicinity weights are produced by the Python QGIS pipeline script from
+ * real DEM + land-cover data and stored directly in the scenario JSON.
+ * Spread from A→B therefore differs from B→A — true asymmetry.
+ */
 
-    int burn_duration;
+struct FuelProperties {
+    double ignition_mod;
+    int    burn_steps;
+    double intensity;
+};
+
+static constexpr std::array<FuelProperties, 5> FUEL_PROPS = {{
+    { 0.00,  0, 0.00 },   // 0 water/road  — non-flammable firebreak
+    { 1.80,  4, 0.40 },   // 1 grass       — fast, low intensity
+    { 1.30,  7, 0.65 },   // 2 shrub       — moderate
+    { 1.00, 10, 0.90 },   // 3 forest      — slow, high intensity
+    { 0.75,  8, 1.00 },   // 4 urban       — high intensity once ignited
+}};
+
+struct WildfireAsymmCell : public cadmium::celldevs::AsymmCell<WildfireCellState, double> {
+
     double base_ignition_prob;
-
-    double wind_speed;
-    double wind_dir;
     double temperature;
     double humidity;
     double ffmc;
 
-    WildfireCell(
-        const cadmium::celldevs::coordinates& id,
-        const std::shared_ptr<const cadmium::celldevs::GridCellConfig<WildfireCellState, double>>& config
-    ) : GridCell(id, config)
+    WildfireAsymmCell(
+        const std::string& id,
+        const std::shared_ptr<const cadmium::celldevs::AsymmCellConfig<WildfireCellState, double>>& config
+    ) : AsymmCell<WildfireCellState, double>(id, config)
     {
-        burn_duration = 8;
         base_ignition_prob = 0.10;
-
-        wind_speed = 0.0;
-        wind_dir = 0.0;
-        temperature = 20.0;
-        humidity = 40.0;
-        ffmc = 85.0;
-
-        auto& j = config->rawCellConfig;
-
-        if (j.contains("burn_duration")) j.at("burn_duration").get_to(burn_duration);
+        temperature        = 22.0;
+        humidity           = 40.0;
+        ffmc               = 85.0;
+        const auto& j = config->rawCellConfig;
         if (j.contains("ignition_prob")) j.at("ignition_prob").get_to(base_ignition_prob);
-
-        if (j.contains("wind_speed")) j.at("wind_speed").get_to(wind_speed);
-        if (j.contains("wind_dir")) j.at("wind_dir").get_to(wind_dir);
-
-        if (j.contains("temperature")) j.at("temperature").get_to(temperature);
-        if (j.contains("humidity")) j.at("humidity").get_to(humidity);
-        if (j.contains("ffmc")) j.at("ffmc").get_to(ffmc);
+        if (j.contains("temperature"))   j.at("temperature").get_to(temperature);
+        if (j.contains("humidity"))      j.at("humidity").get_to(humidity);
+        if (j.contains("ffmc"))          j.at("ffmc").get_to(ffmc);
     }
 
-    double computeIgnitionProb(const cadmium::celldevs::coordinates& nbr) const {
-        double p = base_ignition_prob;
-
-        p *= (ffmc / 100.0);
-        p *= (1.0 + (temperature - 20.0) * 0.02);
-        p *= (1.0 - humidity / 100.0);
-
-       auto my_id = this->getId();
-        double dx = nbr[0] - my_id[0];
-        double dy = nbr[1] - my_id[1];
-
-
-        double angle_to_nbr = atan2(dy, dx) * 180.0 / M_PI;
-        double diff = fabs(angle_to_nbr - wind_dir);
-        if (diff > 180) diff = 360 - diff;
-
-        double wind_factor = 1.0 + (wind_speed / 30.0) * cos(diff * M_PI / 180.0);
-        p *= wind_factor;
-
-        if (p < 0.0) p = 0.0;
-        if (p > 1.0) p = 1.0;
-
-        return p;
-    }
-
-    WildfireCellState localComputation(
+    [[nodiscard]] WildfireCellState localComputation(
         WildfireCellState state,
-        const std::unordered_map<cadmium::celldevs::coordinates,
-        cadmium::celldevs::NeighborData<WildfireCellState, double>>& neighborhood
-    ) const override
-    {
+        const std::unordered_map<std::string,
+              cadmium::celldevs::NeighborData<WildfireCellState, double>>& neighborhood
+    ) const override {
         WildfireCellState next = state;
+
+        if (state.fuel_type == 0 || state.state == 0) return next;
 
         if (state.state == 2) {
             next.burn_steps_remaining--;
-            if (next.burn_steps_remaining <= 0)
-                next.state = 3;
+            if (next.burn_steps_remaining <= 0) { next.state = 3; next.intensity = 0.0; }
             return next;
         }
 
         if (state.state == 1) {
-            for (const auto& [nbr, data] : neighborhood) {
+            int ft = std::max(0, std::min(4, state.fuel_type));
+            if (FUEL_PROPS[ft].ignition_mod == 0.0) return next;
+
+            double p_base = base_ignition_prob
+                * (ffmc / 100.0)
+                * (1.0 + (temperature - 20.0) * 0.02)
+                * std::max(0.01, 1.0 - humidity / 100.0)
+                * FUEL_PROPS[ft].ignition_mod
+                * (1.0 - state.moisture * 0.85);
+
+            for (const auto& [nbrId, data] : neighborhood) {
                 if (data.state->state == 2) {
-                    double p = computeIgnitionProb(nbr);
-                    double r = (double)rand() / RAND_MAX;
-                    if (r < p) {
-                        next.state = 2;
-                        next.burn_steps_remaining = burn_duration;
+                    double vic = static_cast<double>(data.vicinity);
+                    if (vic <= 0.0) continue;
+                    double p = std::min(1.0, p_base * vic * (0.4 + 0.6 * data.state->intensity));
+                    if (static_cast<double>(rand()) / RAND_MAX < p) {
+                        next.state                = 2;
+                        next.burn_steps_remaining = FUEL_PROPS[ft].burn_steps;
+                        next.intensity            = FUEL_PROPS[ft].intensity;
                         return next;
                     }
                 }
             }
         }
-
         return next;
     }
 
-    double outputDelay(const WildfireCellState&) const override {
-        return 5.0;
+    [[nodiscard]] double outputDelay(const WildfireCellState& s) const override {
+        return (s.state == 2) ? 2.0 : 5.0;
     }
 };

@@ -1,57 +1,86 @@
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import matplotlib.colors as mcolors
-import re
-import os
+"""
+visualize_wildfire.py  —  Run: python3 visualize_wildfire.py
+Reads results/grid_log_<name>.csv and saves results/wildfire_<name>.gif
+"""
+import numpy as np, pandas as pd, matplotlib.pyplot as plt
+import matplotlib.animation as animation, matplotlib.colors as mcolors
+import matplotlib.patches as mpatches
+import re, os
 
-LOG_FILE = "build/grid_log.csv"
-GRID_SIZE = (50, 50)
-OUTPUT_GIF = "wildfire.gif"
+SCENARIOS  = ["calm", "windy", "firebreak", "urban", "fortmcmurray"]
+GRID_SIZE  = (50, 50)
+MAX_FRAMES = 80
 
-if not os.path.exists(LOG_FILE):
-    raise FileNotFoundError(f"Could not find {LOG_FILE}")
+os.makedirs("results", exist_ok=True)
 
-df = pd.read_csv(LOG_FILE, sep=";", header=None, engine="python",
-                 names=["time", "model_id", "cell", "event", "state_raw"])
+def make_gif(name):
+    log_file = f"results/grid_log_{name}.csv"
+    out_gif  = f"results/wildfire_{name}.gif"
 
-pattern = re.compile(r"\((\d+),(\d+)\).*state:(\d+), burn:(\d+)")
+    if not os.path.exists(log_file):
+        print(f"  SKIP {name} — {log_file} not found")
+        return
 
-records = []
+    df = pd.read_csv(log_file, sep=";", header=None, engine="python",
+                     names=["time","model_id","cell","event","state_raw"])
 
-for _, row in df.iterrows():
-    text = f"{row['cell']} {row['state_raw']}"
-    m = pattern.search(text)
-    if m:
-        x, y, s, b = map(int, m.groups())
-        records.append((row["time"], x, y, s))
+    pat = re.compile(r"r(\d+)_c(\d+).*state:(\d+)")
+    records = []
+    for _, row in df.iterrows():
+        m = pat.search(f"{row['cell']} {row['state_raw']}")
+        if m:
+            records.append((float(row["time"]), int(m.group(1)),
+                            int(m.group(2)), int(m.group(3))))
 
-records = pd.DataFrame(records, columns=["time", "x", "y", "state"])
+    if not records:
+        print(f"  SKIP {name} — no parseable records")
+        return
 
-timesteps = sorted(records["time"].unique())
-frames = []
+    rdf = pd.DataFrame(records, columns=["time","row","col","state"])
+    timesteps = sorted(rdf["time"].unique())
+    if len(timesteps) > MAX_FRAMES:
+        timesteps = timesteps[::len(timesteps)//MAX_FRAMES]
 
-for t in timesteps:
-    grid = np.zeros(GRID_SIZE, dtype=int)
-    subset = records[records["time"] == t]
-    for _, r in subset.iterrows():
-        grid[r["x"], r["y"]] = r["state"]
-    frames.append(grid)
+    grid = np.ones(GRID_SIZE, dtype=int)
+    frames = []
+    for t in timesteps:
+        for _, r in rdf[rdf["time"]==t].iterrows():
+            ri, ci = int(r.row), int(r.col)
+            if 0<=ri<GRID_SIZE[0] and 0<=ci<GRID_SIZE[1]:
+                grid[ri, ci] = int(r.state)
+        frames.append(grid.copy())
 
-cmap = mcolors.ListedColormap(["white", "green", "red", "black"])
-bounds = [0, 1, 2, 3, 4]
-norm = mcolors.BoundaryNorm(bounds, cmap.N)
+    cmap = mcolors.ListedColormap(["#4a90d9","#2d6a4f","#d62828","#1a1a1a"])
+    norm = mcolors.BoundaryNorm([0,1,2,3,4], cmap.N)
 
-fig, ax = plt.subplots(figsize=(6, 6))
+    fig, ax = plt.subplots(figsize=(6,6))
+    fig.patch.set_facecolor("#0d0d0d")
+    ax.set_facecolor("#0d0d0d"); ax.axis("off")
+    ax.legend(handles=[
+        mpatches.Patch(color="#4a90d9", label="Water/Road"),
+        mpatches.Patch(color="#2d6a4f", label="Unburned"),
+        mpatches.Patch(color="#d62828", label="Burning"),
+        mpatches.Patch(color="#1a1a1a", label="Ash"),
+    ], loc="lower left", fontsize=7, facecolor="#222", labelcolor="white")
 
-def update(i):
-    ax.clear()
-    ax.imshow(frames[i], cmap=cmap, norm=norm)
-    ax.set_title(f"Wildfire Simulation — t={timesteps[i]}")
-    ax.axis("off")
+    im    = ax.imshow(frames[0], cmap=cmap, norm=norm, origin="upper")
+    title = ax.set_title("", color="white", fontsize=11, pad=8)
+    total = GRID_SIZE[0] * GRID_SIZE[1]
 
-ani = animation.FuncAnimation(fig, update, frames=len(frames), interval=150)
+    def update(i):
+        im.set_data(frames[i])
+        burning = int((frames[i]==2).sum())
+        burned  = int((frames[i]==3).sum())
+        title.set_text(f"{name}  t={timesteps[i]:.0f}  |  Burning:{burning}  Burned:{burned}({burned/total*100:.1f}%)")
+        return im, title
 
-ani.save(OUTPUT_GIF, writer="pillow", fps=6)
-print("Saved:", OUTPUT_GIF)
+    ani = animation.FuncAnimation(fig, update, frames=len(frames), interval=150, blit=True)
+    ani.save(out_gif, writer="pillow", fps=6)
+    plt.close()
+    print(f"  Saved: {out_gif}")
+
+print("=== Wildfire Visualizer ===")
+for name in SCENARIOS:
+    print(f"\n[{name}]")
+    make_gif(name)
+print("\nAll done.")
