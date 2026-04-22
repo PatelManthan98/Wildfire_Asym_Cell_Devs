@@ -1,11 +1,3 @@
-"""
-generate_scenarios.py  —  Asymmetric Cell-DEVS Wildfire Scenario Generator
-Features:
-  - Per-cell asymmetric neighbourhoods (wind + slope + distance baked in)
-  - SPOTTING: long-range asymmetric neighbours in downwind direction
-              embers can jump rivers/roads — impossible in symmetric Cell-DEVS
-  - Fort McMurray 2016: real terrain + May 3 weather + spotting validation
-"""
 import json, os, math
 import numpy as np
 from scipy.ndimage import gaussian_filter
@@ -67,12 +59,6 @@ def build_scenario(grid, elev, moisture,
                     if vic > 0.05:
                         nbhd[cid(nr,nc)] = vic
 
-                # ── Spotting neighbours (long-range, downwind only) ───────────
-                # A burning cell at (nr,nc) can spot-ignite THIS cell if:
-                #   1. Wind blows from (nr,nc) toward (r,c)
-                #   2. Distance is within spot_range
-                #   3. There is no CONTINUOUS water barrier between them
-                #      (we check the midpoint cell only — simplified)
                 if spot_range > 0:
                     for dist in range(2, spot_range + 1):
                         for dr, dc in MOORE:
@@ -145,7 +131,6 @@ def build_scenario(grid, elev, moisture,
     spot_info = f", spotting range={spot_range}" if spot_range > 0 else ""
     print(f"  {path}  ({os.path.getsize(path)//1024}KB, {len(cells)} cells{spot_info})")
 
-# ── Fort McMurray terrain builder (shared by S5a and S5b) ────────────────────
 def build_fmc_terrain(G=50):
     elev = np.zeros((G, G))
     for r in range(G):
