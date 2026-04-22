@@ -49,10 +49,9 @@ chmod +x run_all_scenarios.sh
 The simulation generates CSV logs in the results/ directory. You can visualize the spread using the following states:
 
 🟩 Green: Unburned Fuel
-
 🟥 Red: Actively Burning
-
 ⬛ Black: Burned Out (Ash)
+⬜ Grey: Non-combustible (Rivers/Roads)
 
 **📂 Deliverables Structure**
 
@@ -64,4 +63,4 @@ generate_scenarios.py: The GIS-emulation pipeline for asymmetric weights.
 
 Wildfire_CellDEVS_Report.pdf: The 15-20 page IEEE-formatted Term Paper.
 
-⬜ Grey: Non-combustible (Rivers/Roads)
+
