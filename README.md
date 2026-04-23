@@ -1,79 +1,101 @@
-# Asymmetric Cell-DEVS Wildfire Simulation
+Asymmetric Cell-DEVS Wildfire Simulation
 
-A physics‑informed wildfire spread model built using the **Asymmetric Cell‑DEVS** formalism and executed on the **Cadmium v2** discrete‑event simulation engine.  
+A physics-informed wildfire spread model built using the Asymmetric Cell-DEVS formalism and executed on the Cadmium v2 discrete-event simulation engine.
 The model integrates heterogeneous terrain, wind forcing, fuel structure, and probabilistic ember spotting to reproduce real wildfire behavior.
 
----
+--------------------------------------------------
 
-## 🔥 Key Features
+KEY FEATURES
 
-- **Asymmetric Topology:** Wind and slope effects embedded directly into directional vicinity weights.  
-- **Ember Spotting:** Sparse long‑range edges simulate river‑crossing and extreme‑wind ignition.  
-- **Real Geospatial Data:**  
-  - **NRCan CDEM** — elevation & slope  
-  - **NLCMS‑2015** — land‑cover & fuel classification  
-- **High‑Performance Execution:** Built on **Cadmium v2** for asynchronous, event‑driven simulation.
+- Asymmetric Topology:
+  Wind and slope effects embedded directly into directional vicinity weights.
 
----
+- Ember Spotting:
+  Sparse long-range edges simulate river-crossing and extreme-wind ignition.
 
-## 🛠 Prerequisites & Environment Setup
+- Real Geospatial Data:
+  NRCan CDEM — elevation & slope
+  NLCMS-2015 — land-cover & fuel classification
 
-This project was developed on the `devsim` server. A Python virtual environment is used to avoid system‑level dependency issues.
+- High-Performance Execution:
+  Built on Cadmium v2 for asynchronous, event-driven simulation.
 
-### 1. Python Environment
+--------------------------------------------------
 
-Create virtual environment
+PREREQUISITES & ENVIRONMENT SETUP
+
+This project was developed on the devsim server.
+A Python virtual environment is used to avoid system-level dependency issues.
+
+1. Python Environment
+
+Create virtual environment:
 python3 -m venv .venv
 
-# Activate environment
+Activate environment:
 source .venv/bin/activate
 
-# Install visualization dependencies
+Install visualization dependencies:
 pip install numpy matplotlib pandas
 
-🏃 Running the Simulation
+--------------------------------------------------
+
+RUNNING THE SIMULATION
+
 From the project root:
 
-bash
-# Usage:
-# ./build/wildfire_sim <scenario_file> <time_steps> <seed>
+Usage:
+./build/wildfire_sim <scenario_file> <time_steps> <seed>
 
+Example:
 ./build/wildfire_sim scenario.json 500 42
+
+Parameters:
 scenario.json — grid, fuel, weather, and topology configuration
-
 500 — total simulation steps
-
 42 — random seed for reproducibility
 
-📊 Visualization & Analysis
+--------------------------------------------------
+
+VISUALIZATION & ANALYSIS
+
 After simulation, a grid_log.csv file is generated in /build.
 
-To generate the animated GIF and statistical plots:
+To generate outputs:
 
-bash
-# Ensure virtual environment is active
+Ensure virtual environment is active:
 source .venv/bin/activate
 
-# Run visualization
+Run visualization:
 python3 visualize_wildfire.py
+
 Outputs include:
+- wildfire_spread.gif — animated fire progression
+- PNG charts:
+  • rate of spread
+  • active burning cells
+  • cumulative burn area
 
-wildfire_spread.gif — animated fire progression
+--------------------------------------------------
 
-PNG charts — rate of spread, active burning cells, cumulative burn area
+VALIDATED SCENARIOS
 
-🧪 Validated Scenarios
-The model has been tested across multiple wildfire behaviors:
+Scenario 1 — Calm:
+Isotropic spread under no-wind conditions
 
-Scenario 1 — Calm: Isotropic spread under no‑wind conditions
+Scenario 3 — Firebreak:
+Complete containment by a river (no spotting)
 
-Scenario 3 — Firebreak: Complete containment by a river (no spotting)
+Scenario 4 — Moderate Wind:
+Spotting occurs but cannot sustain a breach
 
-Scenario 4 — Moderate Wind: Spotting occurs but cannot sustain a breach
+Scenario 7 — Fort McMurray:
+Reproduces the 2016 Horse River breach under 65 km/h winds
 
-Scenario 7 — Fort McMurray: Reproduces the 2016 Horse River breach under 65 km/h winds
+--------------------------------------------------
 
-✍️ Author
-Manthan Patel  
+AUTHOR
+
+Manthan Patel
 Department of Systems and Computer Engineering
 Carleton University
