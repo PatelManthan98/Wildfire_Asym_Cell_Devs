@@ -22,8 +22,7 @@ This project was developed on the `devsim` server. A Python virtual environment 
 
 ### 1. Python Environment
 
-```bash
-# Create virtual environment
+Create virtual environment
 python3 -m venv .venv
 
 # Activate environment
