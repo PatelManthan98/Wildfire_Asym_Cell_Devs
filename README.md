@@ -1,96 +1,84 @@
-**`Asymmetric Cell‑DEVS Wildfire Spread Simulation
-A Terrain‑Aware, Physics‑Driven Wildfire Modeling Framework`**
-📖 Project Overview
-This project implements an advanced wildfire spread simulator based on the Asymmetric Cell‑DEVS formalism. Unlike traditional symmetric grid models such as Cellular Automata, this simulator assigns each cell its own unique neighborhood, where every neighbor connection carries a directional weight. These weights encode real physical influences, enabling the model to reproduce complex wildfire behavior with high fidelity.
+# Asymmetric Cell-DEVS Wildfire Simulation
 
-The directional weights are pre‑computed from real geospatial and environmental data. Wind vectors are derived from the May 2016 Fort McMurray Horse River wildfire weather conditions. Slope gradients are extracted from Digital Elevation Models (DEM), and fuel adjacency incorporates land‑cover classification to represent rivers, roads, forests, grasslands, and urban zones. This results in a GIS‑inspired, physics‑informed wildfire simulation capable of modeling asymmetric spread, firebreaks, and long‑range ember spotting.
+This project implements a physics-informed wildfire spread model using the **Asymmetric Cell-DEVS** formalism within the **Cadmium v2** discrete-event simulation library. The model accounts for heterogeneous terrain, wind forcing, and probabilistic ember spotting.
 
-🚀 Key Features
-Asymmetric Topology Engine
-The simulator replaces the traditional Moore neighborhood with a weighted, directed graph, where each edge represents a unique physical influence. This allows the model to capture wind‑driven spread, slope‑induced acceleration, and directional fuel transitions.
+## 🚀 Key Features
+- **Structural Asymmetry:** Wind and slope effects are structurally embedded into the topology via asymmetric vicinity weights.
+- **Ember Spotting:** Uses sparse, long-range directed edges to simulate river-crossing behavior during extreme weather events.
+- **Real-World Data:** Integrated with **NRCan CDEM** (Elevation) and **NLCMS-2015** (Land Cover) geospatial data.
+- **Cadmium v2 Engine:** Leverages asynchronous discrete-event execution for high computational efficiency and scalability.
 
-Fort McMurray 2016 Case Study
-The system is validated against the real Horse River wildfire, using historical weather data:
-65 km/h south‑west winds, 32°C temperature, and 13% relative humidity.
-The model reproduces the documented ember‑driven crossing of the Athabasca River.
+---
 
-GIS‑Inspired Scenario Pipeline
-A Python‑based generator mimics a QGIS workflow, producing asymmetric JSON configurations from DEM and land‑cover data. This pipeline automates the creation of realistic wildfire scenarios.
+## 🛠 Prerequisites & Environment Setup
 
-Event‑Driven Simulation Efficiency
-Built on Cadmium v2, the simulator leverages discrete‑event execution for high performance, enabling large‑scale wildfire modeling with minimal computational overhead.
+This project was developed and tested on the `devsim` server. To manage Python dependencies without administrative privileges, a virtual environment is used.
 
-🛠️ Installation & Build
-1. Prerequisites
-Ensure the following tools are installed:
+### 1. Python Environment
+```bash
+# Create the virtual environment
+python3 -m venv .venv
 
-GCC 13+ (C++20 support required)
+# Activate the environment
+source .venv/bin/activate
 
-CMake 3.10+
+# Install required libraries for visualization
+pip install numpy matplotlib pandas
 
-Cadmium v2 (included as a submodule or cloned manually)
+2. C++ Requirements
+Compiler: C++17 (GCC 9+)
 
-2. Setup Dependencies
-Clone the Cadmium v2 framework into the project root:
+Build Tool: CMake 3.10+
 
-bash
-git clone https://github.com/SimulationEverywhere/cadmium_v2.git cadmium_v2
-3. Compilation
-Use the provided build script:
+Library: Cadmium v2 (included in /libraries)
 
-bash
-chmod +x build_sim.sh
-./build_sim.sh
+🏗 Build and Compilation
+Follow these exact steps to compile the simulation. This process ensures the linker correctly identifies all dependencies.
+
+Bash
+# Prepare build directory
+rm -rf build
+mkdir build
+cd build
+
+# Configure and compile
+cmake ..
+make
+Technical Note: If you encounter an "undefined reference to main" error during the make process, ensure that main.cpp does not contain #pragma once at the very top of the file.
+
 🏃 Running the Simulation
-1. Generate Scenarios
-Run the Python script to create asymmetric neighborhood files:
+Execute the simulation from the project root directory. The executable requires a scenario configuration, total time steps, and a random seed.
 
-bash
-python3 generate_scenarios.py
-This produces five scenarios in the scenarios/ directory:
+Bash
+# Usage: ./build/wildfire_sim <scenario_file> <time_steps> <seed>
+./build/wildfire_sim scenario.json 500 42
+scenario.json: Input file containing fuel parameters, grid setup, and weather conditions.
 
-calm
+500: Total simulation time steps.
 
-windy
+42: Random seed (ensures results are reproducible for scientific validation).
 
-firebreak
+📊 Visualization & Analysis
+Once the simulation completes, a grid_log.csv file is generated in the build directory. To generate an animated GIF and statistical plots:
 
-urban
+Bash
+# Ensure the virtual environment is active
+source .venv/bin/activate
 
-fortmcmurray
+# Run the visualization script
+python3 visualize_wildfire.py
+The script will produce wildfire_spread.gif and statistical charts (PNG) showing the rate of spread and active burning cells.
 
-2. Execute All Models
-Run the batch simulation script:
+🧪 Validated Scenarios
+The model has been tested against several critical wildfire behaviors:
 
-bash
-chmod +x run_all_scenarios.sh
-./run_all_scenarios.sh
-All logs are saved automatically.
+Scenario 1 (Calm): Isotropic spread under no-wind conditions.
 
-📊 Results and Visualization
-Simulation outputs are stored as CSV logs in the results/ directory.
-Visualization scripts interpret the grid states using the following color scheme:
+Scenario 3 (Firebreak): Total containment by a wide river barrier (No spotting).
 
-🟩 Green: Unburned fuel
+Scenario 4 (Moderate Wind): Spotting is active but insufficient for a sustained breach.
 
-🟥 Red: Actively burning
+Scenario 7 (Fort McMurray): Successful reconstruction of the 2016 breach under 65 km/h wind with high-intensity urban ignition.
 
-⬛ Black: Burned out (ash)
-
-⬜ Grey: Non‑combustible terrain (rivers, roads, water bodies)
-
-These visualizations allow you to observe directional spread, firebreak interactions, and ember spotting behavior.
-
-📂 Project Structure
-Code
-include/
-   ├── wildfire_cell.hpp        # Asymmetric Cell-DEVS cell definition
-   ├── wildfire_state.hpp       # State structure for each cell
-
-main.cpp                        # AsymmCellDEVSCoupled model entry point
-generate_scenarios.py           # GIS-inspired scenario generator
-run_all_scenarios.sh            # Batch simulation runner
-build_sim.sh                    # Build script
-results/                        # Simulation logs and outputs
-scenarios/                      # Generated asymmetric JSON scenarios
-Wildfire_CellDEVS_Report.pdf    # Full IEEE-style 15–20 page term paper
+✍️ Author
+Manthan Patel Department of Systems and Computer Engineering, Carleton University
