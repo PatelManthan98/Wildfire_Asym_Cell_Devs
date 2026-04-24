@@ -1,8 +1,8 @@
-# Asymmetric Cell-DEVS Wildfire Simulation
+**# Asymmetric Cell-DEVS Wildfire Simulation**
 
 This project implements a physics-informed wildfire spread model using the **Asymmetric Cell-DEVS** formalism within the **Cadmium v2** discrete-event simulation library. The model accounts for heterogeneous terrain, wind forcing, and probabilistic ember spotting.
 
-## 🚀 Key Features
+**## 🚀 Key Features**
 - **Structural Asymmetry:** Wind and slope effects are structurally embedded into the topology via asymmetric vicinity weights.
 - **Ember Spotting:** Uses sparse, long-range directed edges to simulate river-crossing behavior during extreme weather events.
 - **Real-World Data:** Integrated with **NRCan CDEM** (Elevation) and **NLCMS-2015** (Land Cover) geospatial data.
@@ -10,7 +10,7 @@ This project implements a physics-informed wildfire spread model using the **Asy
 
 ---
 
-## 🛠 Prerequisites & Environment Setup
+**## 🛠 Prerequisites & Environment Setup**
 
 Follow these steps to prepare the environment and install dependencies.
 
@@ -30,13 +30,13 @@ source .venv/bin/activate
 pip install --upgrade pip
 pip install numpy matplotlib pandas
 ````
-🏗 Build and Compilation
+**🏗 Build and Compilation**
 Use the following commands to compile the simulation engine. This process handles the linking of the Cadmium headers.
 # Navigate to project root, then create and enter build directory
 ```
 source build_sim.sh
 ```
-## 🏃 Running the Simulation
+**## 🏃 Running the Simulation**
 1. Scenario Generation
 Before running the model, generate the specific scenario JSON files using the provided Python script:
 ```
@@ -55,12 +55,12 @@ python3 generate_scenarios.py
 ```
 source run_all_scenario.sh
  ```
-###📊 Visualization & Analysis
+**📊 Visualization & Analysis**
 After the simulation finishes, a grid_log.csv file is created. Use the Python script to generate the animated GIF and statistical plots.  
 ```
 python3 visualize_wildfire.py
 ```
-🧪 Validated Scenarios
+**🧪 Validated Scenarios**
 The model demonstrates critical wildfire behaviors through these four primary scenarios:
 
 Scenario 1 (Calm): Baseline isotropic spread under no-wind conditions, confirming the core model logic.
@@ -71,5 +71,5 @@ Scenario 4 (Moderate Wind): Spotting is active at 25 km/h, but ignitions remain 
 
 Scenario 7 (Fort McMurray): Reconstruction of the 2016 breach under 65 km/h wind. The fire bypasses the Athabasca River via long-range spotting and escalates into urban fuels.
 
-✍️ Author
+**✍️ Author**
 Manthan Patel Department of Systems and Computer Engineering, Carleton University
