@@ -30,7 +30,7 @@ source .venv/bin/activate
 pip install --upgrade pip
 pip install numpy matplotlib pandas
 ````
-###🏗 Build and Compilation
+🏗 Build and Compilation
 Use the following commands to compile the simulation engine. This process handles the linking of the Cadmium headers.
 # Navigate to project root, then create and enter build directory
 ```
