@@ -43,6 +43,9 @@ Activate:
 Install dependencies:
   pip install numpy matplotlib pandas
 
+Clone cadmium_v2:
+  git clone https://github.com/SimulationEverywhere/cadmium_v2.git cadmium_v2
+
 
 ----------------------------------------------------------------------
 🏃 RUN SIMULATION
