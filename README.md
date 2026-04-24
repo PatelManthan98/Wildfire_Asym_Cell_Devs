@@ -34,7 +34,7 @@ pip install numpy matplotlib pandas
 Use the following commands to compile the simulation engine. This process handles the linking of the Cadmium headers.
 # Navigate to project root, then create and enter build directory
 ```
-source build.sh
+source build_sim.sh
 ```
 ## 🏃 Running the Simulation
 1. Scenario Generation
