@@ -46,7 +46,8 @@ python3 generate_scenarios.py
 ```
 2. Execution
    Run the simulation from the project root. The executable requires the scenario file, total time steps, and a random seed.
-   # Usage to run scenarios individuall: ./build/wildfire_sim <scenario_file> <time_steps> <seed>
+   
+   **# Usage to run scenarios individuall: ./build/wildfire_sim <scenario_file> <time_steps> <seed>**
 ```
 ./build/wildfire_sim scenarios/scenario_fortmcmurray.json 500 42
 ```
