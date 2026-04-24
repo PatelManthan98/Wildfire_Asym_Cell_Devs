@@ -12,9 +12,9 @@ This project implements a physics-informed wildfire spread model using the **Asy
 
 ## 🛠 Prerequisites & Environment Setup
 
-This project was developed and tested on the `devsim` server. Follow these steps to prepare the environment and install dependencies without root access.
+Follow these steps to prepare the environment and install dependencies.
 
-###1. Ensure Cadmium v2 is available at $CADMIUM or clone locally
+1. Ensure Cadmium v2 is available at $CADMIUM or clone locally
 ```
 git clone https://github.com/SimulationEverywhere/cadmium_v2.git cadmium_v2
 ```
