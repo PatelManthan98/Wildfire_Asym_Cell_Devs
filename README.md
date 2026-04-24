@@ -32,8 +32,9 @@ reproduce realistic wildfire behavior.
 ⚙️ SETUP & ENVIRONMENT
 ----------------------------------------------------------------------
 
-Developed on: devsim server
-
+Clone cadmium_v2:
+  git clone https://github.com/SimulationEverywhere/cadmium_v2.git cadmium_v2
+  
 Create environment:
   python3 -m venv .venv
 
@@ -43,8 +44,6 @@ Activate:
 Install dependencies:
   pip install numpy matplotlib pandas
 
-Clone cadmium_v2:
-  git clone https://github.com/SimulationEverywhere/cadmium_v2.git cadmium_v2
 
 
 ----------------------------------------------------------------------
