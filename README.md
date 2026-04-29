@@ -52,7 +52,10 @@ python3 generate_scenarios.py
 ./build/wildfire_sim scenarios/scenario_fortmcmurray.json 500 42
 ```
 ## To run all the scenarios at Once
+Make sure to be in Python virtual Environment before running the below script
+
 ```
+source .venv/bin/activate
 source run_all_scenarios.sh
  ```
 **📊 Visualization & Analysis**
