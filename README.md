@@ -14,7 +14,7 @@ This project implements a physics-informed wildfire spread model using the **Asy
 
 Follow these steps to prepare the environment and install dependencies.
 
-1. Ensure Cadmium v2 is available at $CADMIUM or clone locally(Mandatory to clone)
+1. Ensure Cadmium v2 is available so clone locally(Mandatory to clone)
 ```
 git clone https://github.com/SimulationEverywhere/cadmium_v2.git cadmium_v2
 ```
