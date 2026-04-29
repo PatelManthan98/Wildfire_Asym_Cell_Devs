@@ -53,7 +53,7 @@ python3 generate_scenarios.py
 ```
 ## To run all the scenarios at Once
 ```
-source run_all_scenario.sh
+source run_all_scenarios.sh
  ```
 **📊 Visualization & Analysis**
 After the simulation finishes, a grid_log.csv file is created. Use the Python script to generate the animated GIF and statistical plots.  
